@@ -1,0 +1,2 @@
+# DisasterZonePathFinding
+This Prolog program be designed to assist in search-and-rescue operations after a natural disaster. An earthquake has scattered cars in a parking garage in such a way that a rescue robot cannot reach the entrance to the main building to search for survivors. A drone has been used to identify the layout of the cars as they sit now. A plan must be devised for how the cars can be moved backward and forward in order to clear a path from the robot’s entrance to the currently blocked door.

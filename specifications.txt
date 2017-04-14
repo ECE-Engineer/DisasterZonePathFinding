@@ -1,0 +1,55 @@
+-----------------------------------------------------------------------------------------------------------------------------------
+Program Flow
+
+	Main
+	1) currentBoardConfig = parseGrid(input)
+	2) solutionConfig = findSolution([], [], currentBoardConfig)
+	3) printSolution(solutionConfig)
+
+	findSolution(prevBoardConfigs, prevMoves, currentBoardConfig)
+	1) If currentBoardConfig has solution path then return true
+	2) Get all board configurations that can be achieved from the current board config which do not already exist in prevBoardConfigs
+	3) For each newBoardConfig
+		a) lastMove = the move that got us to that config
+		b) return findSolution(prevBoardConfigs + currentBoardConfig, prevMoves + lastMove, newBoardConfig )
+	4) return false
+
+-----------------------------------------------------------------------------------------------------------------------------------
+Important functions 
+	
+	parseGrid(input, boardConfig)
+		- used to convert input to boardConfig
+	
+	findSolution(prevBoardConfigs, prevMoves, currentBoardConfig)
+		- use to navigate through board configuration tree
+
+	solutionPath(boardConfig, path)
+		- used to find a solution path in the current board config (if one exists)
+
+	moveResult(boardConfig, move, newBoardConfig)
+		- used to perform a move on a given board config
+
+	validMove(boardConfig, move)
+		- used to get valid moves for a given board config
+
+
+	printSolution(solutionMoveSequence)
+		- prints the solution sequene of moves and then calculates and prints the solution path
+
+
+--------------------------------------------------------------------------------------------------------------------------------------
+Data Structures
+
+	Grid
+	- [ car1, car2, car3,..., car-n ]
+  
+	Car
+	- [ head-point,...., tail-point ]
+
+	Point
+	- {x,y}
+
+	Move
+	- {carIndex, spacesForward}
+	- ex) {1, 2} means move car 1 two spaces forwards
+	- ex) {1, -1} means move car 1 one space backwards

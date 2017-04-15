@@ -40,8 +40,30 @@ scaledVector([X,Y], [Sx,Sy], [X1,Y1]) :- X1 is X * Sx, Y1 is Y * Sy.
 % True if [Dx,Dy] is a valid representation of a move vector
 delta([Dx,Dy]) :- Dx == 0 ; Dy == 0.
 
-% True if Result is equal to Car but transformed by RelativeDelta
-move(Car, RelativeDelta, Result) :- delta(RelativeDelta), 		
-									direction(Car, Dir),
-									scaledVector(Dir, RelativeDelta, AbsoluteDelta), 
-									translatedPoints(Car, AbsoluteDelta, Result).
+% True if Result is a translation of Car by the specified vector relative to Car's direction
+translatedCar(Car, RelativeDelta, Result) :- 	delta(RelativeDelta),
+												direction(Car, Dir),
+												scaledVector(Dir, RelativeDelta, AbsoluteDelta), 
+												translatedPoints(Car, AbsoluteDelta, Result).
+
+% True if Result is a valid translation of the car at CarIndex of Carr by the specified vector relative 
+% to the car's direction and constrained by the other cars on the grid
+validMove(Cars, CarIndex, RelativeDelta, [Result|OtherCars]) :-  nth0(CarIndex, Cars, Car),
+													deleteAtIndex(CarIndex, Cars, OtherCars),
+													translatedCar(Car, RelativeDelta, Result), 		
+													allSpacesAreUnoccupied(OtherCars, Result).
+
+% True if Result is equal to List with the element at Index removed
+deleteAtIndex(Index, List, Result) :- deleteAtIndex(0, Index, List, Result).
+
+deleteAtIndex(_, _, [], []).
+deleteAtIndex(CurrentIndex, Index, [H|T], [H|Result]) :- CurrentIndex \= Index, NextIndex is CurrentIndex + 1, deleteAtIndex(NextIndex, Index, T, Result).
+deleteAtIndex(CurrentIndex, Index, [_|T], T) :- CurrentIndex == Index. 
+
+% True if Point is not occupied by any of the specified cars
+isUnoccupiedSpace([], _).
+isUnoccupiedSpace([Car|Cars], Point) :- \+ member(Point, Car), isUnoccupiedSpace(Cars, Point).
+
+% True if all of the given points are unoccupied by any of the specified cars
+allSpacesAreUnoccupied(_, []).
+allSpacesAreUnoccupied(Cars, [Point|Points]) :- isUnoccupiedSpace(Cars, Point), allSpacesAreUnoccupied(Cars, Points).

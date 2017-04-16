@@ -46,19 +46,11 @@ translatedCar(Car, RelativeDelta, Result) :- 	delta(RelativeDelta),
 												scaledVector(Dir, RelativeDelta, AbsoluteDelta), 
 												translatedPoints(Car, AbsoluteDelta, Result).
 
-% True if Result is a valid translation of the car at CarIndex of Carr by the specified vector relative 
+% True if Result is a valid translation of the given car found within Cars by the specified vector relative 
 % to the car's direction and constrained by the other cars on the grid
-validMove(Cars, CarIndex, RelativeDelta, [Result|OtherCars]) :-  nth0(CarIndex, Cars, Car),
-													deleteAtIndex(CarIndex, Cars, OtherCars),
-													translatedCar(Car, RelativeDelta, Result), 		
-													allSpacesAreUnoccupied(OtherCars, Result).
-
-% True if Result is equal to List with the element at Index removed
-deleteAtIndex(Index, List, Result) :- deleteAtIndex(0, Index, List, Result).
-
-deleteAtIndex(_, _, [], []).
-deleteAtIndex(CurrentIndex, Index, [H|T], [H|Result]) :- CurrentIndex \= Index, NextIndex is CurrentIndex + 1, deleteAtIndex(NextIndex, Index, T, Result).
-deleteAtIndex(CurrentIndex, Index, [_|T], T) :- CurrentIndex == Index. 
+validMove(Cars, Car, RelativeDelta, [Result|OtherCars]) :-  delete(Cars, Car, OtherCars),
+															translatedCar(Car, RelativeDelta, Result), 		
+															allSpacesAreUnoccupied(OtherCars, Result).
 
 % True if Point is not occupied by any of the specified cars
 isUnoccupiedSpace([], _).

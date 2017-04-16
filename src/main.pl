@@ -48,7 +48,7 @@ translatedCar(Car, RelativeDelta, Result) :- 	delta(RelativeDelta),
 
 % True if Result is a valid translation of the given car found within Cars by the specified vector relative 
 % to the car's direction and constrained by the other cars on the grid
-validMove(Cars, Car, RelativeDelta, [Result|OtherCars]) :-  delete(Cars, Car, OtherCars),
+validMove(Cars, [Car, RelativeDelta], [Result|OtherCars]) :-  delete(Cars, Car, OtherCars),
 															translatedCar(Car, RelativeDelta, Result), 		
 															allSpacesAreUnoccupied(OtherCars, Result).
 
@@ -59,3 +59,24 @@ isUnoccupiedSpace([Car|Cars], Point) :- \+ member(Point, Car), isUnoccupiedSpace
 % True if all of the given points are unoccupied by any of the specified cars
 allSpacesAreUnoccupied(_, []).
 allSpacesAreUnoccupied(Cars, [Point|Points]) :- isUnoccupiedSpace(Cars, Point), allSpacesAreUnoccupied(Cars, Points).
+
+hasValidMoves(_, _, _).
+
+% True if a solution can be reached from the configuration of cars represented in Config without transitioning to 
+% one of the configurations in PrevConfigs.
+hasSolution(_, Config, PrevMoves, PrevMoves) :- pathExists(Config).
+hasSolution(PrevConfigs, Config, PrevMoves, Solution) :- 	\+ member(Config, PrevConfigs),
+															hasValidMoves(Config, Moves),
+															hasSolution(PrevConfigs, Config, PrevMoves, Moves, Solution).
+
+% True if a solution can be reached from the configuration of cars represented in Config without transitioning to 
+% one of the configurations in PrevConfigs, by following one of the specified moves
+hasSolution(PrevConfigs, Config, PrevMoves, [Move|_], Solution) :- hasSolutionWithMove(PrevConfigs, Config, PrevMoves, Move, Solution).
+hasSolution(PrevConfigs, Config, PrevMoves, [_|Moves], Solution) :- hasSolution(PrevConfigs, Config, PrevMoves, Moves, Solution).
+
+% True if a solution can be reached from the configuration of cars represented in Config without transitioning to 
+% one of the configurations in PrevConfigs, by following the specified move
+hasSolutionWithMove(PrevConfigs, Config, PrevMoves, Move, Solution) :- validMove(Config, Move, NewConfig),
+																		hasSolution([Config|PrevConfigs], NewConfig, [Move|PrevMoves], Solution).
+
+pathExists(_).

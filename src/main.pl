@@ -40,17 +40,34 @@ scaledVector([X,Y], [Sx,Sy], [X1,Y1]) :- X1 is X * Sx, Y1 is Y * Sy.
 % True if [Dx,Dy] is a valid representation of a move vector
 delta([Dx,Dy]) :- Dx == 0 ; Dy == 0.
 
+%TODO: Update this to take Dir(Integer) instead of RelativeDelta(Vector) 
 % True if Result is a translation of Car by the specified vector relative to Car's direction
 translatedCar(Car, RelativeDelta, Result) :- 	delta(RelativeDelta),
 												direction(Car, Dir),
 												scaledVector(Dir, RelativeDelta, AbsoluteDelta), 
 												translatedPoints(Car, AbsoluteDelta, Result).
 
-% True if Result is a valid translation of the given car found within Cars by the specified vector relative 
+% True if Result is a valid translation of the car at CarIndex of Car by the specified vector relative 
 % to the car's direction and constrained by the other cars on the grid
-validMove(Cars, [Car, RelativeDelta], [Result|OtherCars]) :-  delete(Cars, Car, OtherCars),
-															translatedCar(Car, RelativeDelta, Result), 		
-															allSpacesAreUnoccupied(OtherCars, Result).
+validMove(Cars, [CarIndex, Dir], Result) :-  splitAtIndex(Cars, CarIndex, LeftCars, [Car|RightCars]),
+											translatedCar(Car, Dir, NewCar), 		
+											allSpacesAreUnoccupied(LeftCars, NewCar),
+											allSpacesAreUnoccupied(RightCars, NewCar),
+											append(LeftCars, [NewCar|RightCars], Result).
+  
+% True if Left is a list containing the elements of List up to but not including Index
+% And Right is a list containing the rest of List.
+splitAtIndex(N, List, [], List) :- N == 0.
+splitAtIndex(N, [H|T], [H|Left], Right) :- N1 is N - 1, splitAtIndex(N1, T, Left, Right).
+
+% True if Moves is a list of all the possible moves that could be performed on the configuration of cars in Cars
+hasMoves(Cars, Moves) :- length(Cars, Index), hasMoves(Index, [], Moves).
+hasMoves(Index, PrevMoves, PrevMoves) :- Index == 0.
+hasMoves(Index, PrevMoves, Result) :- Index > 0, NextIndex is Index - 1,
+									Move1 = [Index, 1], Move2 = [Index, -1],
+									NewMoves = [Move1,Move2],
+									append(NewMoves, PrevMoves, Moves),
+									hasMoves(NextIndex, Moves, Result).
 
 % True if Point is not occupied by any of the specified cars
 isUnoccupiedSpace([], _).
@@ -60,23 +77,21 @@ isUnoccupiedSpace([Car|Cars], Point) :- \+ member(Point, Car), isUnoccupiedSpace
 allSpacesAreUnoccupied(_, []).
 allSpacesAreUnoccupied(Cars, [Point|Points]) :- isUnoccupiedSpace(Cars, Point), allSpacesAreUnoccupied(Cars, Points).
 
-hasValidMoves(_, _, _).
-
 % True if a solution can be reached from the configuration of cars represented in Config without transitioning to 
 % one of the configurations in PrevConfigs.
-hasSolution(_, Config, PrevMoves, PrevMoves) :- pathExists(Config).
-hasSolution(PrevConfigs, Config, PrevMoves, Solution) :- 	\+ member(Config, PrevConfigs),
-															hasValidMoves(Config, Moves),
-															hasSolution(PrevConfigs, Config, PrevMoves, Moves, Solution).
+solutionExists(_, Config, PrevMoves, PrevMoves) :- pathExists(Config).
+solutionExists(PrevConfigs, Config, PrevMoves, Solution) :- 	hasMoves(Config, Moves),
+																solutionExists(PrevConfigs, Config, PrevMoves, Moves, Solution).
 
 % True if a solution can be reached from the configuration of cars represented in Config without transitioning to 
 % one of the configurations in PrevConfigs, by following one of the specified moves
-hasSolution(PrevConfigs, Config, PrevMoves, [Move|_], Solution) :- hasSolutionWithMove(PrevConfigs, Config, PrevMoves, Move, Solution).
-hasSolution(PrevConfigs, Config, PrevMoves, [_|Moves], Solution) :- hasSolution(PrevConfigs, Config, PrevMoves, Moves, Solution).
+solutionExists(PrevConfigs, Config, PrevMoves, [Move|_], Solution) :- solutionExistsWithMove(PrevConfigs, Config, PrevMoves, Move, Solution).
+solutionExists(PrevConfigs, Config, PrevMoves, [_|Moves], Solution) :- solutionExists(PrevConfigs, Config, PrevMoves, Moves, Solution).
 
 % True if a solution can be reached from the configuration of cars represented in Config without transitioning to 
 % one of the configurations in PrevConfigs, by following the specified move
-hasSolutionWithMove(PrevConfigs, Config, PrevMoves, Move, Solution) :- validMove(Config, Move, NewConfig),
-																		hasSolution([Config|PrevConfigs], NewConfig, [Move|PrevMoves], Solution).
+solutionExistsWithMove(PrevConfigs, Config, PrevMoves, Move, Solution) :- validMove(Config, Move, NewConfig),
+																		\+ member(NewConfig, PrevConfigs),
+																		solutionExists([Config|PrevConfigs], NewConfig, [Move|PrevMoves], Solution).
 
 pathExists(_).

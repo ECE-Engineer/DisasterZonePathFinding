@@ -60,7 +60,6 @@ splitAtIndex(N, [H|T], [H|Left], Right) :- N1 is N - 1, splitAtIndex(N1, T, Left
 
 % True if Moves is a list of all the possible moves that could potenially be performed on the configuration of cars in Cars.
 % The moves returned in Moves are not necessarily valid moves, and must be checked for validity against the given configuration.
-% A Move is structured according to the specification detailed at the top of this file.
 hasMoves(Cars, Moves) :- length(Cars, Length), LastIndex is Length - 1, hasMoves(LastIndex, [], Moves).
 hasMoves(Index, PrevMoves, PrevMoves) :- Index == -1.
 hasMoves(Index, PrevMoves, Result) :- Index >= 0, NextIndex is Index - 1,
@@ -99,4 +98,14 @@ solutionExistsWithMove(PrevConfigs, Config, PrevMoves, Move, Solution) :- validM
                                                                         \+ member(NewConfig, PrevConfigs),
                                                                         solutionExists([Config|PrevConfigs], NewConfig, [Move|PrevMoves], Solution).
 
-pathExists(_).
+isPath(CurrentPosition, EndPosition, CarList, BookeepingList)
+
+isPath(CurrentPosition, EndPosition, CarList, BookeepingList, [Move|_]) :- 
+    addPoint(CurrentPosition, Move, NewPosition), point(NewPosition),
+    not(wasHereAlready(CurrentPosition, BookeepingList)),
+    not(carTakenSpot(NewPosition, CarList)),
+    append([CurrentPosition], BookeepingList, NewBookeepingList),
+    isPath(NewPosition, EndPosition, CarList, NewBookeepingList).
+
+isPath(CurrentPosition, EndPosition, CarList, BookeepingList, [_|Moves]) :- 
+    isPath(CurrentPosition, EndPosition, CarList, BookeepingList, Moves).

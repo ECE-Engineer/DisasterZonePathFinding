@@ -267,14 +267,10 @@ isPath(CurrentPosition, EndPosition, CarList, BookeepingList) :- CurrentPosition
 % isPath([0,0], [0,0], [], []).
 % isPath([0,0], [0,1], [], []).-------------------this should pass!!
 % isPath([0,0], [1,1], [], []).-------------------this should pass!!
-% isPath([0,0], [6,6], [], []).----------haven't gotten to this yet!
-% isPath([0,0], [6,6], [], []).----------haven't gotten to this yet!
-% isPath([0,0], [6,6], [], []).----------haven't gotten to this yet!
+% isPath([0,0], [5,5], [], []).----------haven't gotten to this yet!
 % 
 % 
 % 
-% could the issue be with the variable in the square brackets
-% could the issue be how i am storing the value on the list >>> BookeepingList    when im using the append function
 % 
 % 
 % 
@@ -289,13 +285,28 @@ isPath(CurrentPosition, EndPosition, CarList, BookeepingList) :- CurrentPosition
 %%%%%%%%%%%%%%%%carTakenSpot(wasHereAlready(point(addPoint(CurrentPosition,[-1,0], CurrentPosition)), BookeepingList), CarList).
 
 
+
+
+
+
+
+
+
+
+
 %%% Create a method that returns the list of moves of the solution path.
 
+
+
+%%% (takes a list) & (scans each element using isPath) & (deletes the invaid elements from the list)
+
+
 % USE THE BOOKEEPING LIST after seeing if a path exists
-% by going through all the points in the list to see 
+% by going through all the points in the list (AN ELEMENT AT A TIME) to see 
 % if they have a path to the solution and 
 % if they don't then delete them from the list!!!
 %%%%%% the leftover list will by the path   (((MAKE SURE TO ITERATE OVER THE LIST IN ORDER)))!!!
+
 
 
 
